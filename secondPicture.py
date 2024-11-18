@@ -44,10 +44,6 @@ def overlay_transparent_layer(rgb_image, grayscale_image):
     return result
 
 def apply_random_yellow_sky(image, mask, white_threshold=240, num_yellow_pixels=500):
-    """
-    Changes random pixels to yellow in areas that are very close to white in the mask.
-    Creates larger, more visible stars.
-    """
     # Convert image to RGBA if it isn't already
     if image.mode != 'RGBA':
         image = image.convert('RGBA')
@@ -129,12 +125,8 @@ def create_sky_mask(image, threshold=160, top_fraction=0.4, middle_fraction=0.2)
     # Apply the grayscale values to the defined region
     refined_mask_array[:top_cutoff, middle_start:middle_end] = mask_array[:top_cutoff, middle_start:middle_end]
     
-    # Optional: Apply some smoothing to reduce harsh transitions
     refined_mask = Image.fromarray(refined_mask_array)
     refined_mask = refined_mask.filter(ImageFilter.GaussianBlur(radius=2))
-    
-    # Debug information
-    print("Grayscale value range:", np.min(refined_mask_array), "to", np.max(refined_mask_array))
     
     return refined_mask
 
@@ -160,7 +152,6 @@ img.paste(newspapers, newspaperPosition, newspapers)
 img = overlay_transparent_layer(img, depth)
 
 def create_sun(size, radius, position=(0, 0)):
-    """Create a sun with glow effect at the specified size and position"""
     sun_size = (size, size)
     sun_img = Image.new("RGBA", sun_size, (0, 0, 0, 0))
     sun_center = (sun_size[0] // 2, sun_size[1] // 2)
@@ -237,8 +228,8 @@ num_frames_night = 50
 # Initial values
 initial_size = 500
 initial_radius = 65
-final_size = 100  # The sun will shrink to this size
-final_radius = 10  # The sun will shrink to this radius
+final_size = 100 
+final_radius = 10  
 
 for frame_num in range(num_frames):
     frame = img.copy()
@@ -262,26 +253,6 @@ for frame_num in range(num_frames):
     # Paste the sun onto the frame
     frame.paste(sun, (x_pos, y_pos), sun)
     frames.append(np.array(frame)) 
-
-# for frame_num in range(num_frames, num_frames + num_frames_night):
-#     frame = img.copy()
-
-#     if (frame_num - num_frames) % 15 == 0:
-#         frame = apply_random_yellow_sky(
-#             frame,  # Pass the current frame, not the original image
-#             sky_mask,
-#             white_threshold=240,  
-#             num_yellow_pixels=10
-#         ) 
-
-
-#     # Gradually darken the scene to simulate night
-#     darkening_factor = (frame_num - num_frames) / num_frames_night*0.8
-#     night_gradient = create_night_gradient(img.size, intensity=darkening_factor)  # Gradually increase intensity
-    
-#     frame = Image.alpha_composite(frame.convert('RGBA'), night_gradient)
-
-#     frames.append(np.array(frame)) 
 
 # Store the star pattern frame
 star_frame = None
@@ -310,7 +281,7 @@ for frame_num in range(num_frames, num_frames + num_frames_night):
     frames.append(np.array(frame))
 
 # Now save it as an MP4 video using moviepy
-fps = 30  # Frame rate for the video, you can adjust this
+fps = 30  
 clip = ImageSequenceClip(frames, fps=fps)  # Create a video clip from the frames
 
 # Write the video to an MP4 file (MP4 format)
